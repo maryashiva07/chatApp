@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account</title>
+
+    <link rel="stylesheet" href="auth.css">
+</head>
+
+<body>
+
+    <main class="auth-container">
+
+        <section class="auth-card">
+
+            <div class="brand">
+                <div class="brand-icon">W</div>
+                <h1>WhatsApp</h1>
+            </div>
+
+            <div class="heading">
+                <h2>Create your account</h2>
+                <p>Join us and start connecting with people.</p>
+            </div>
+
+            <form id="signupForm">
+
+                <div class="input-group">
+                    <label for="name">Full Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter your name"
+                        autocomplete="name"
+                    >
+                    <small class="error" id="nameError"></small>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                    >
+                    <small class="error" id="emailError"></small>
+                </div>
+
+                <div class="input-group">
+                    <label for="phone">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        placeholder="Enter phone number"
+                        maxlength="10"
+                        autocomplete="tel"
+                    >
+                    <small class="error" id="phoneError"></small>
+                </div>
+
+                <div class="input-group">
+                    <label for="signupPassword">Password</label>
+
+                    <div class="password-box">
+                        <input
+                            type="password"
+                            id="signupPassword"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                        >
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            data-target="signupPassword"
+                        >
+                            Show
+                        </button>
+                    </div>
+
+                    <small class="error" id="passwordError"></small>
+                </div>
+
+                <button type="submit" class="submit-btn" id="signupBtn">
+                    Create Account
+                </button>
+
+                <p class="form-message" id="signupMessage"></p>
+
+            </form>
+
+            <div class="switch-page">
+                Already have an account?
+                <a href="login.html">Login</a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="auth.js"></script>
+</body>
+</html>
+
