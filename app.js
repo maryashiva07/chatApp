@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-
+const {connectRedis} = require("./config/redis");
 const userRoute = require("./routes/userRoutes");
 const sequelize = require("./config/database");
 
@@ -29,6 +29,8 @@ async function startServer(){
 
            await sequelize.sync();
            console.log("Table sync!");
+
+           await connectRedis();
 
            app.listen(PORT, ()=>{
                console.log("App is running on port: ", PORT);

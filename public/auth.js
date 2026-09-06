@@ -255,9 +255,6 @@ if (loginForm) {
                         "Content-Type": "application/json"
                     },
 
-                    // IMPORTANT:
-                    // Backend expects email, not identifier
-
                     body: JSON.stringify({
                         email,
                         password
@@ -311,7 +308,7 @@ if (loginForm) {
 
             setTimeout(() => {
 
-                window.location.href = "index.html";
+                window.location.href = "chat.html";
 
             }, 1000);
 
