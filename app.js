@@ -5,6 +5,7 @@ const path = require("path");
 const {connectRedis} = require("./config/redis");
 const userRoute = require("./routes/userRoutes");
 const sequelize = require("./config/database");
+const chatRoute = require("./routes/chatRoutes");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", userRoute);
+app.use("/api", chatRoute);
 
 const PORT = process.env.PORT || 7000;
 

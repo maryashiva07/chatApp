@@ -1,12 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Chat Window</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
@@ -18,94 +19,139 @@
         <aside class="sidebar">
 
             <div class="sidebar-header">
+
                 <div class="profile">
+
                     <div class="avatar">S</div>
+
                     <div>
                         <h3>Chats</h3>
                         <span>Online</span>
                     </div>
+
                 </div>
 
                 <button class="icon-btn">⋮</button>
+
             </div>
 
+
             <div class="search-box">
+
                 <span>⌕</span>
+
                 <input
                     type="text"
                     placeholder="Search or start new chat"
-                >
+                />
+
             </div>
+
 
             <div class="chat-list">
 
                 <div class="chat-item active">
+
                     <div class="avatar">A</div>
 
                     <div class="chat-info">
+
                         <div class="chat-top">
+
                             <h4>Alex Johnson</h4>
+
                             <span>10:42 AM</span>
+
                         </div>
 
                         <p>Hey! How are you doing?</p>
+
                     </div>
+
                 </div>
 
 
                 <div class="chat-item">
+
                     <div class="avatar">R</div>
 
                     <div class="chat-info">
+
                         <div class="chat-top">
+
                             <h4>Rahul</h4>
+
                             <span>9:35 AM</span>
+
                         </div>
 
                         <p>Let's meet tomorrow.</p>
+
                     </div>
+
                 </div>
 
 
                 <div class="chat-item">
+
                     <div class="avatar">P</div>
 
                     <div class="chat-info">
+
                         <div class="chat-top">
+
                             <h4>Priya</h4>
+
                             <span>Yesterday</span>
+
                         </div>
 
                         <p>Thanks for your help!</p>
+
                     </div>
+
                 </div>
 
 
                 <div class="chat-item">
+
                     <div class="avatar">D</div>
 
                     <div class="chat-info">
+
                         <div class="chat-top">
+
                             <h4>Development Team</h4>
+
                             <span>Yesterday</span>
+
                         </div>
 
                         <p>New task has been assigned.</p>
+
                     </div>
+
                 </div>
 
 
                 <div class="chat-item">
+
                     <div class="avatar">M</div>
 
                     <div class="chat-info">
+
                         <div class="chat-top">
+
                             <h4>Mom</h4>
+
                             <span>Monday</span>
+
                         </div>
 
                         <p>Call me when you're free.</p>
+
                     </div>
+
                 </div>
 
             </div>
@@ -117,6 +163,7 @@
 
         <section class="chat-window">
 
+
             <!-- Chat Header -->
 
             <header class="chat-header">
@@ -126,15 +173,22 @@
                     <div class="avatar">A</div>
 
                     <div>
+
                         <h3>Alex Johnson</h3>
+
                         <span>online</span>
+
                     </div>
 
                 </div>
 
+
                 <div class="header-actions">
+
                     <button class="icon-btn">⌕</button>
+
                     <button class="icon-btn">⋮</button>
+
                 </div>
 
             </header>
@@ -142,14 +196,17 @@
 
             <!-- Messages -->
 
-            <div class="messages">
+            <div class="messages" id="messages">
 
                 <div class="date-divider">
+
                     <span>Today</span>
+
                 </div>
 
 
                 <div class="message received">
+
                     <p>
                         Hey! How are you doing?
                     </p>
@@ -157,10 +214,12 @@
                     <span class="time">
                         10:40 AM
                     </span>
+
                 </div>
 
 
                 <div class="message sent">
+
                     <p>
                         Hey Alex! I'm doing great. How about you?
                     </p>
@@ -169,10 +228,12 @@
                         10:41 AM
                         <span class="ticks">✓✓</span>
                     </span>
+
                 </div>
 
 
                 <div class="message received">
+
                     <p>
                         I'm good too! Are you working on the new project?
                     </p>
@@ -180,10 +241,12 @@
                     <span class="time">
                         10:41 AM
                     </span>
+
                 </div>
 
 
                 <div class="message sent">
+
                     <p>
                         Yes! I'm currently working on the chat interface.
                     </p>
@@ -192,10 +255,12 @@
                         10:42 AM
                         <span class="ticks">✓✓</span>
                     </span>
+
                 </div>
 
 
                 <div class="message received">
+
                     <p>
                         That's awesome! The UI looks really clean.
                     </p>
@@ -203,10 +268,12 @@
                     <span class="time">
                         10:42 AM
                     </span>
+
                 </div>
 
 
                 <div class="message sent">
+
                     <p>
                         Thanks! I'll add real-time messaging next.
                     </p>
@@ -215,10 +282,12 @@
                         10:43 AM
                         <span class="ticks">✓✓</span>
                     </span>
+
                 </div>
 
 
                 <div class="message received">
+
                     <p>
                         Perfect. Let me know if you need any help.
                     </p>
@@ -226,6 +295,18 @@
                     <span class="time">
                         10:44 AM
                     </span>
+
+                </div>
+
+
+                <!-- Future received message -->
+
+                <div class="message received">
+
+                    <p>
+                        Hey! How are you doing?
+                    </p>
+
                 </div>
 
             </div>
@@ -239,16 +320,23 @@
                     😊
                 </button>
 
+
                 <button class="input-icon">
                     📎
                 </button>
 
+
                 <input
+                    id="messageInput"
                     type="text"
                     placeholder="Type a message"
-                >
+                />
 
-                <button class="send-btn">
+
+                <button
+                    id="sendBtn"
+                    class="send-btn"
+                >
                     ➤
                 </button>
 
@@ -258,5 +346,10 @@
 
     </main>
 
+
+    <script src="chat.js"></script>
+
 </body>
+
 </html>
+
