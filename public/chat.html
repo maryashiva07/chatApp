@@ -1,4 +1,4 @@
-<!doctype html>
+<!-- <!doctype html>
 <html lang="en">
 
 <head>
@@ -14,7 +14,7 @@
 
     <main class="chat-app">
 
-        <!-- Sidebar -->
+        <!-- Sidebar 
 
         <aside class="sidebar">
 
@@ -48,9 +48,9 @@
             </div>
 
 
-            <div class="chat-list">
+            <div class="chat-list" id="chatList">
 
-                <div class="chat-item active">
+                <!-- <div class="chat-item active">
 
                     <div class="avatar">A</div>
 
@@ -152,19 +152,19 @@
 
                     </div>
 
-                </div>
+                </div> 
 
             </div>
 
         </aside>
 
 
-        <!-- Chat Window -->
+        <!-- Chat Window 
 
         <section class="chat-window">
 
 
-            <!-- Chat Header -->
+            <!-- Chat Header 
 
             <header class="chat-header">
 
@@ -196,7 +196,7 @@
             </header>
 
 
-            <!-- Messages -->
+            Messages 
 
             <div class="messages" id="messages">
 
@@ -301,7 +301,7 @@
                 </div>
 
 
-                <!-- Future received message -->
+                 Future received message 
 
                 <div class="message received">
 
@@ -314,7 +314,7 @@
             </div>
 
 
-            <!-- Message Input -->
+            <!-- Message Input 
 
             <footer class="message-input-area">
 
@@ -354,4 +354,188 @@
 </body>
 
 </html>
+ -->
 
+
+
+
+
+
+ <!doctype html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    />
+
+    <title>Chat Window</title>
+
+    <link rel="stylesheet" href="style2.css" />
+
+</head>
+
+<body>
+
+<main class="chat-app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="profile">
+
+                <div
+                    class="avatar"
+                    id="myAvatar"
+                >
+                    S
+                </div>
+
+                <div>
+
+                    <h3 id="myName">
+                        Chats
+                    </h3>
+
+                    <span>
+                        Online
+                    </span>
+
+                </div>
+
+            </div>
+
+            <button class="icon-btn">
+                ⋮
+            </button>
+
+        </div>
+
+
+        <div class="search-box">
+
+            <span>
+                ⌕
+            </span>
+
+            <input
+                type="text"
+                placeholder="Search or start new chat"
+            />
+
+        </div>
+
+
+        <!-- Users will be loaded dynamically -->
+        <div
+            class="chat-list"
+            id="chatList"
+        >
+        </div>
+
+    </aside>
+
+
+    <!-- Chat Window -->
+    <section class="chat-window">
+
+        <!-- Chat Header -->
+        <header class="chat-header">
+
+            <button
+                class="mobile-back"
+                id="backBtn"
+            >
+                ←
+            </button>
+
+            <div class="chat-user">
+
+                <div
+                    class="avatar"
+                    id="selectedUserAvatar"
+                >
+                    ?
+                </div>
+
+                <div>
+
+                    <h3 id="selectedUserName">
+                        Select a chat
+                    </h3>
+
+                    <span id="selectedUserStatus">
+                        offline
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <button class="icon-btn">
+                    ⌕
+                </button>
+
+                <button class="icon-btn">
+                    ⋮
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- Messages -->
+        <div
+            class="messages"
+            id="messages"
+        >
+        </div>
+
+
+        <!-- Message Input -->
+        <footer class="message-input-area">
+
+            <button class="input-icon">
+                😊
+            </button>
+
+            <button class="input-icon">
+                📎
+            </button>
+
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="Type a message"
+            />
+
+            <button
+                id="sendBtn"
+                class="send-btn"
+            >
+                ➤
+            </button>
+
+        </footer>
+
+    </section>
+
+</main>
+
+
+<script src="chat.js"></script>
+
+</body>
+
+</html>

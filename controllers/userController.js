@@ -1,5 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
+
 
 const User = require("../modules/User");
 
@@ -118,4 +120,41 @@ const login = async (req, res) =>{
 };
 
 
-module.exports = {signup, login};
+
+
+const getUsers = async (req, res) => {
+
+    try {
+
+        const users = await User.findAll({
+
+            attributes: ["id", "name", "email"],
+
+            where: {
+                id: {
+                    [Op.ne]: req.user.id
+                }
+            }
+
+        });
+
+        res.status(200).json({
+            users
+        });
+
+    }
+    catch (err) {
+
+        res.status(500).json({
+            message: "Error getting users",
+            err: err.message
+        });
+
+    }
+
+};
+
+
+
+
+module.exports = {signup, login, getUsers};

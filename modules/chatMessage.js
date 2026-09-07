@@ -12,9 +12,17 @@ const chatMessage = sequelize.define("chatMessage", {
           type: DataTypes.INTEGER,
           allowNull: false
       },
+      receiverId:{
+          type: DataTypes.INTEGER,
+          allowNull: false
+      },
       message:{
            type: DataTypes.TEXT,
            allowNull: false
+      },
+      seen:{
+          type: DataTypes.BOOLEAN,
+          defaultValue: false
       }
 });
 
