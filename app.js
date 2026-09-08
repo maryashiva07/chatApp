@@ -1,13 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const webSocket = require("ws");
 const http = require("http");
+const { Server } = require("socket.io");
 
 const { connectRedis } = require("./config/redis");
 const userRoute = require("./routes/userRoutes");
 const sequelize = require("./config/database");
 const chatRoute = require("./routes/chatRoutes");
+
+const { socketAuthMiddleware } = require("./middleware/authMiddleware");
 
 const app = express();
 
@@ -22,190 +24,93 @@ app.use("/api", chatRoute);
 const PORT = process.env.PORT || 7000;
 
 app.get("/", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "public", "login.html")
-    );
+  res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// Create HTTP server
+// Create HTTP Server
 const server = http.createServer(app);
 
-// Create WebSocket server
-const wss = new webSocket.Server({
-    server
+// Create Socket.IO Server
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
 });
 
-// Store userId and socket connection
+// Socket Authentication
+io.use(socketAuthMiddleware);
+
+// Store online users
 const onlineUsers = new Map();
 
+// Handle Socket Connection
+io.on("connection", (socket) => {
+  const currentUserId = socket.user.id;
 
-// Handle new WebSocket connection
-wss.on("connection", (socket) => {
+  console.log("User connected:", currentUserId);
 
-    console.log("User connected!");
+  // Store userId and socket
+  onlineUsers.set(currentUserId, socket);
 
-    let currentUserId = null;
+  console.log("Online users:", [...onlineUsers.keys()]);
 
-    // Handle WebSocket messages
-    socket.on("message", (data) => {
-
-        try {
-
-            const messageData =
-                JSON.parse(data.toString());
-
-            console.log(
-                "WebSocket Data:",
-                messageData
-            );
-
-            // Register user
-            if (
-                messageData.type === "register"
-            ) {
-
-                currentUserId =
-                    Number(messageData.userId);
-
-                onlineUsers.set(
-                    currentUserId,
-                    socket
-                );
-
-                console.log(
-                    "User registered:",
-                    currentUserId
-                );
-
-                return;
-            }
-
-            // Handle chat message
-            if (
-                messageData.type === "chat"
-            ) {
-
-                const receiverId =
-                    Number(
-                        messageData.receiverId
-                    );
-
-                const receiverSocket =
-                    onlineUsers.get(
-                        receiverId
-                    );
-
-                // Send message only to receiver
-                if (
-                    receiverSocket &&
-                    receiverSocket.readyState ===
-                        webSocket.OPEN
-                ) {
-
-                    receiverSocket.send(
-                        JSON.stringify(
-                            messageData
-                        )
-                    );
-
-                    console.log(
-                        `Message sent to user ${receiverId}`
-                    );
-
-                } else {
-
-                    console.log(
-                        `User ${receiverId} is offline`
-                    );
-
-                }
-
-            }
-
-        } catch (err) {
-
-            console.log(
-                "WebSocket Error:",
-                err
-            );
-
-        }
-
-    });
-
-
-    // Handle socket close
-    socket.on("close", () => {
-
-        if (currentUserId) {
-
-            const savedSocket =
-                onlineUsers.get(
-                    currentUserId
-                );
-
-            // Delete only this user's socket
-            if (
-                savedSocket === socket
-            ) {
-
-                onlineUsers.delete(
-                    currentUserId
-                );
-
-            }
-
-        }
-
-        console.log(
-            "User disconnected!"
-        );
-
-    });
-
-});
-
-
-// Start server
-async function startServer() {
-
+  // Handle chat message
+  socket.on("chat", (messageData) => {
     try {
+      const receiverId = Number(messageData.receiverId);
 
-        await sequelize.authenticate();
+      console.log("Message received:", messageData);
 
-        console.log(
-            "Database connected Successfully"
-        );
+      const receiverSocket = onlineUsers.get(receiverId);
 
-        await sequelize.sync();
+      // Send only to receiver
+      if (receiverSocket) {
+        receiverSocket.emit("chat", {
+          senderId: currentUserId,
+          receiverId: receiverId,
+          message: messageData.message,
+        });
 
-        console.log(
-            "Table sync!"
-        );
-
-        await connectRedis();
-
-        server.listen(
-            PORT,
-            () => {
-
-                console.log(
-                    "App is running on port:",
-                    PORT
-                );
-
-            }
-        );
-
+        console.log(`Message sent to user ${receiverId}`);
+      } else {
+        console.log(`User ${receiverId} is offline`);
+      }
     } catch (err) {
+      console.log("Socket Error:", err);
+    }
+  });
 
-        console.log(
-            "Error on connecting server:",
-            err
-        );
+  // Handle disconnect
+  socket.on("disconnect", () => {
+    const savedSocket = onlineUsers.get(currentUserId);
 
+    if (savedSocket === socket) {
+      onlineUsers.delete(currentUserId);
     }
 
+    console.log("User disconnected:", currentUserId);
+  });
+});
+
+// Start Server
+async function startServer() {
+  try {
+    await sequelize.authenticate();
+
+    console.log("Database connected Successfully");
+
+    await sequelize.sync();
+
+    console.log("Table sync!");
+
+    await connectRedis();
+
+    server.listen(PORT, () => {
+      console.log("App is running on port:", PORT);
+    });
+  } catch (err) {
+    console.log("Error on connecting server:", err);
+  }
 }
 
 startServer();

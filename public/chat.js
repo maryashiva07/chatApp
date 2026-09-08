@@ -1,3 +1,5 @@
+const API_URL = "/api";
+
 const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const messages = document.getElementById("messages");
@@ -5,17 +7,18 @@ const chatList = document.getElementById("chatList");
 
 console.log("chatList:", chatList);
 
+// Get logged-in user
 const currentUser = JSON.parse(localStorage.getItem("user"));
 
 if (!currentUser) {
   window.location.href = "login.html";
+} else {
+  document.getElementById("myName").textContent = currentUser.name;
+
+  document.getElementById("myAvatar").textContent = currentUser.name
+    .charAt(0)
+    .toUpperCase();
 }
-
-document.getElementById("myName").textContent = currentUser.name;
-
-document.getElementById("myAvatar").textContent = currentUser.name
-  .charAt(0)
-  .toUpperCase();
 
 let selectedUserId = null;
 
@@ -24,39 +27,37 @@ const unreadCounts = {};
 const chatApp = document.querySelector(".chat-app");
 const backBtn = document.getElementById("backBtn");
 
-// Handle mobile back button
+// Mobile back button
 backBtn.addEventListener("click", () => {
   chatApp.classList.remove("chat-open");
 });
 
-// Create WebSocket connection
-const socket = new WebSocket(`ws://${window.location.host}`);
+// SOCKET.IO CONNECTION
 
-// Register current user with WebSocket server
-socket.onopen = () => {
-  console.log("WebSocket connected");
+const token = localStorage.getItem("token");
 
-  socket.send(
-    JSON.stringify({
-      type: "register",
-      userId: currentUser.id,
-    }),
-  );
-};
+const socket = io( {
+  auth: {
+    token: token,
+  },
+});
 
-// Handle incoming WebSocket messages
-socket.onmessage = (event) => {
-  const data = JSON.parse(event.data);
+// Socket connected
+socket.on("connect", () => {
+  console.log("Socket.IO connected:", socket.id);
+});
 
-  console.log("WebSocket message:", data);
+// Socket authentication error
+socket.on("connect_error", (error) => {
+  console.log("Socket authentication failed:", error.message);
+});
 
-  if (!data.chat) {
-    return;
-  }
+// RECEIVE MESSAGE
 
-  const chat = data.chat;
+socket.on("chat", (data) => {
+  console.log("New Socket Message:", data);
 
-  const senderId = Number(chat.userId);
+  const senderId = Number(data.senderId);
 
   const myId = Number(currentUser.id);
 
@@ -64,36 +65,35 @@ socket.onmessage = (event) => {
     return;
   }
 
+  // If currently chatting with sender
   if (Number(selectedUserId) === senderId) {
-    addMessage(chat);
+    addMessage(data);
 
     markMessagesAsSeen(senderId);
   } else {
+    // Message from another user
     increaseUnreadCount(senderId);
   }
-};
+});
 
-// Handle WebSocket close
-socket.onclose = () => {
-  console.log("WebSocket disconnected");
-};
+// Socket disconnected
+socket.on("disconnect", () => {
+  console.log("Socket.IO disconnected");
+});
 
-// Handle WebSocket error
-socket.onerror = (error) => {
-  console.log("WebSocket error:", error);
-};
+// SEND BUTTON
 
-// Send message on button click
 sendBtn.addEventListener("click", sendMessage);
 
-// Send message on Enter key
+// Enter key
 messageInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     sendMessage();
   }
 });
 
-// Send message to selected user
+// SEND MESSAGE
+
 async function sendMessage() {
   const message = messageInput.value.trim();
 
@@ -116,7 +116,8 @@ async function sendMessage() {
   }
 
   try {
-    const response = await fetch("/api/messages", {
+    // Save message in database
+    const response = await fetch(`${API_URL}/messages`, {
       method: "POST",
 
       headers: {
@@ -127,7 +128,6 @@ async function sendMessage() {
 
       body: JSON.stringify({
         message: message,
-
         receiverId: selectedUserId,
       }),
     });
@@ -140,19 +140,18 @@ async function sendMessage() {
       return;
     }
 
+    // Show message immediately for sender
     addMessage(data.chat);
 
-    // Notify receiver through WebSocket
-    if (socket.readyState === WebSocket.OPEN) {
-      socket.send(
-        JSON.stringify({
-          type: "chat",
-          receiverId: selectedUserId,
-          chat: data.chat,
-        }),
-      );
+    // Send message through Socket.IO
+    if (socket.connected) {
+      socket.emit("chat", {
+        receiverId: selectedUserId,
+        message: data.chat.message,
+      });
     }
 
+    // Clear input
     messageInput.value = "";
 
     messageInput.focus();
@@ -161,7 +160,8 @@ async function sendMessage() {
   }
 }
 
-// Load messages of selected user
+// LOAD MESSAGES
+
 async function loadMessages() {
   if (!selectedUserId) {
     return;
@@ -169,8 +169,12 @@ async function loadMessages() {
 
   const token = localStorage.getItem("token");
 
+  if (!token) {
+    return;
+  }
+
   try {
-    const response = await fetch(`/api/messages?receiverId=${selectedUserId}`, {
+    const response = await fetch(`${API_URL}/messages?receiverId=${selectedUserId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -186,12 +190,14 @@ async function loadMessages() {
 
     messages.innerHTML = "";
 
+    // Add messages
     data.chats.forEach((chat) => {
       addMessage(chat);
     });
 
     messages.scrollTop = messages.scrollHeight;
 
+    // Mark messages as seen
     await markMessagesAsSeen(selectedUserId);
 
     removeUnreadCount(selectedUserId);
@@ -200,7 +206,8 @@ async function loadMessages() {
   }
 }
 
-// Load all users
+// LOAD USERS
+
 async function loadUsers() {
   const token = localStorage.getItem("token");
 
@@ -211,7 +218,7 @@ async function loadUsers() {
   }
 
   try {
-    const response = await fetch("/api/users", {
+    const response = await fetch(`${API_URL}/users`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -228,6 +235,7 @@ async function loadUsers() {
     chatList.innerHTML = "";
 
     data.users.forEach((user) => {
+      // Don't show logged-in user
       if (Number(user.id) === Number(currentUser.id)) {
         return;
       }
@@ -236,45 +244,50 @@ async function loadUsers() {
 
       chatItem.classList.add("chat-item");
 
+      // Store user ID
       chatItem.dataset.userId = user.id;
 
       chatItem.innerHTML = `
 
-                    <div class="avatar">
-                        ${user.name.charAt(0).toUpperCase()}
-                    </div>
+                <div class="avatar">
+                    ${user.name.charAt(0).toUpperCase()}
+                </div>
 
-                    <div class="chat-info">
+                <div class="chat-info">
 
-                        <div class="chat-top">
+                    <div class="chat-top">
 
-                            <h4>
-                                ${user.name}
-                            </h4>
+                        <h4>
+                            ${user.name}
+                        </h4>
 
-                            <span
-                                class="unread-count"
-                                id="unread-${user.id}"
-                                style="display:none"
-                            >
-                                0
-                            </span>
-
-                        </div>
+                        <span
+                            class="unread-count"
+                            id="unread-${user.id}"
+                            style="display:none"
+                        >
+                            0
+                        </span>
 
                     </div>
 
-                `;
+                </div>
 
+            `;
+
+      // Select chat
       chatItem.addEventListener("click", () => {
         selectedUserId = Number(user.id);
 
+        // Remove active
         document.querySelectorAll(".chat-item").forEach((item) => {
           item.classList.remove("active");
         });
 
+        // Add active
         chatItem.classList.add("active");
 
+        // Update header
         document.getElementById("selectedUserName").textContent = user.name;
 
         document.getElementById("selectedUserAvatar").textContent = user.name
@@ -283,10 +296,13 @@ async function loadUsers() {
 
         document.getElementById("selectedUserStatus").textContent = "online";
 
+        // Remove unread count
         removeUnreadCount(user.id);
 
+        // Load selected user's messages
         loadMessages();
 
+        // Mobile
         if (window.innerWidth <= 600) {
           chatApp.classList.add("chat-open");
         }
@@ -299,11 +315,15 @@ async function loadUsers() {
   }
 }
 
-// Add message to chat window
+// ADD MESSAGE TO CHAT
+
 function addMessage(chat) {
   const messageDiv = document.createElement("div");
 
-  const isMine = Number(chat.userId) === Number(currentUser.id);
+  // New structure uses senderId
+  const senderId = Number(chat.senderId ?? chat.userId);
+
+  const isMine = senderId === Number(currentUser.id);
 
   messageDiv.classList.add("message", isMine ? "sent" : "received");
 
@@ -328,7 +348,7 @@ function addMessage(chat) {
                         <span class="ticks">
                             ✓✓
                         </span>
-                    `
+                      `
                 : ""
             }
 
@@ -341,7 +361,8 @@ function addMessage(chat) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-// Increase unread message count
+// UNREAD COUNT
+
 function increaseUnreadCount(userId) {
   userId = Number(userId);
 
@@ -362,7 +383,7 @@ function increaseUnreadCount(userId) {
   unreadElement.style.display = "flex";
 }
 
-// Remove unread message count
+// Remove unread count
 function removeUnreadCount(userId) {
   userId = Number(userId);
 
@@ -379,7 +400,9 @@ function removeUnreadCount(userId) {
   unreadElement.style.display = "none";
 }
 
-// Mark messages as seen
+
+// MARK MESSAGES AS SEEN
+
 async function markMessagesAsSeen(senderId) {
   const token = localStorage.getItem("token");
 
@@ -388,7 +411,7 @@ async function markMessagesAsSeen(senderId) {
   }
 
   try {
-    await fetch("/api/messages/seen", {
+    await fetch(`${API_URL}/messages/seen`, {
       method: "PUT",
 
       headers: {
@@ -406,5 +429,6 @@ async function markMessagesAsSeen(senderId) {
   }
 }
 
-// Start chat application
+// START CHAT APPLICATION
+
 loadUsers();
