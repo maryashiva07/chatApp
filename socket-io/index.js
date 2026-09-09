@@ -1,7 +1,8 @@
 const { Server } = require("socket.io");
 
 const socketAuthMiddleware = require("./middleware");
-const handleChat = require("../socket-io/chat");
+const handleChat = require("./handlers/chat");
+const personalChat = require("./handlers/personalChat");
 
 const onlineUsers = new Map();
 
@@ -24,6 +25,8 @@ const initializeSocket = (server) => {
     console.log("Online users:", [...onlineUsers.keys()]);
 
     handleChat(io, socket, onlineUsers);
+
+    personalChat(io, socket);
 
     socket.on("disconnect", () => {
       const savedSocket = onlineUsers.get(currentUserId);
