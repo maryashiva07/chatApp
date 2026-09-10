@@ -12,8 +12,10 @@
 
   <body>
     <main class="chat-app">
-      <!-- Sidebar -->
+      <!-- SIDEBAR -->
+
       <aside class="sidebar">
+    
         <div class="sidebar-header">
           <div class="profile">
             <div class="avatar" id="myAvatar">S</div>
@@ -28,19 +30,35 @@
           <button class="icon-btn">⋮</button>
         </div>
 
+        <!-- Search -->
         <div class="search-box">
           <span> ⌕ </span>
 
-          <input type="text" placeholder="Search or start new chat" />
+          <input type="text" id="searchInput" placeholder="Search by email" />
         </div>
 
-        <!-- Users will be loaded dynamically -->
+        <!-- Create Group -->
+        <button id="createGroupBtn" class="create-group-btn">
+          + Create Group
+        </button>
+
+        <!-- Groups heading -->
+        <div class="section-title">Groups</div>
+
+        <!-- Groups -->
+        <div class="chat-list" id="groupList"></div>
+
+        <!-- Users heading -->
+        <div class="section-title">Users</div>
+
+        <!-- Users -->
         <div class="chat-list" id="chatList"></div>
       </aside>
 
-      
+      <!--CHAT WINDOW -->
+
       <section class="chat-window">
-       
+        <!-- Header -->
         <header class="chat-header">
           <button class="mobile-back" id="backBtn">←</button>
 
@@ -64,7 +82,7 @@
         <!-- Messages -->
         <div class="messages" id="messages"></div>
 
-        <!-- Message Input -->
+        <!-- Message input -->
         <footer class="message-input-area">
           <button class="input-icon">😊</button>
 
@@ -76,8 +94,31 @@
         </footer>
       </section>
     </main>
-    
+
+    <!--CREATE GROUP MODAL -->
+
+    <div id="groupModal" class="group-modal" style="display: none">
+      <div class="group-modal-content">
+        <h2>Create Group</h2>
+
+        <input type="text" id="groupNameInput" placeholder="Enter group name" />
+
+        <h4>Select Members</h4>
+
+        <div id="groupUsers" class="group-users"></div>
+
+        <div class="group-modal-actions">
+          <button id="cancelGroupBtn">Cancel</button>
+
+          <button id="createGroupConfirmBtn">Create Group</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Socket.IO -->
     <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Chat JS -->
     <script src="chat.js"></script>
   </body>
 </html>
