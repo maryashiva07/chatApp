@@ -1039,5 +1039,9 @@ async function markMessagesAsSeen(senderId) {
   }
 }
 
+<<<<<<< HEAD
 
+=======
+// START
+>>>>>>> 038d49ae530bb2426288c3eea81a486eec1d16d9
 loadUsers();
