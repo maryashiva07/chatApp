@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Chat Window</title>
+
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -21,12 +23,13 @@
             </div>
           </div>
 
-          <button class="icon-btn">⋮</button>
+          <button class="icon-btn" type="button">⋮</button>
         </div>
 
         <!-- SEARCH -->
         <div class="search-box">
           <span>⌕</span>
+
           <input
             type="text"
             id="searchInput"
@@ -35,16 +38,22 @@
         </div>
 
         <!-- CREATE GROUP -->
-        <button id="createGroupBtn" class="create-group-btn">
+        <button
+          id="createGroupBtn"
+          class="create-group-btn"
+          type="button"
+        >
           + Create Group
         </button>
 
         <!-- USERS -->
         <div class="section-title">Users</div>
+
         <div class="chat-list" id="chatList"></div>
 
         <!-- GROUPS -->
         <div class="section-title">Groups</div>
+
         <div class="chat-list" id="groupList"></div>
       </aside>
 
@@ -52,28 +61,68 @@
       <section class="chat-window">
         <!-- HEADER -->
         <header class="chat-header">
-          <button class="mobile-back" id="backBtn">←</button>
+          <button
+            class="mobile-back"
+            id="backBtn"
+            type="button"
+          >
+            ←
+          </button>
 
           <div class="chat-user">
-            <div class="avatar" id="selectedUserAvatar">?</div>
+            <div class="avatar" id="selectedUserAvatar">
+              ?
+            </div>
 
             <div>
-              <h3 id="selectedUserName">Select a chat</h3>
-              <span id="selectedUserStatus">offline</span>
+              <h3 id="selectedUserName">
+                Select a chat
+              </h3>
+
+              <span id="selectedUserStatus">
+                offline
+              </span>
             </div>
           </div>
 
           <div class="header-actions">
-            <button class="icon-btn">⌕</button>
-            <button class="icon-btn">⋮</button>
+            <button
+              class="icon-btn"
+              type="button"
+            >
+              ⌕
+            </button>
+
+            <button
+              class="icon-btn"
+              type="button"
+            >
+              ⋮
+            </button>
           </div>
         </header>
 
         <!-- MESSAGES -->
         <div class="messages" id="messages"></div>
 
+        <!-- AI SMART REPLIES -->
+        <div
+          id="smartReplies"
+          class="smart-replies"
+        ></div>
+
+        <!-- AI TYPING SUGGESTIONS -->
+        <div
+          id="typingSuggestions"
+          class="typing-suggestions"
+        ></div>
+
+        <!-- EMOJI PICKER -->
+        <emoji-picker id="emojiPicker"></emoji-picker>
+
         <!-- MESSAGE INPUT -->
         <footer class="message-input-area">
+          <!-- EMOJI -->
           <button
             class="input-icon emoji-btn"
             id="emojiBtn"
@@ -83,6 +132,7 @@
             😊
           </button>
 
+          <!-- FILE -->
           <button
             class="input-icon file-btn"
             id="fileBtn"
@@ -99,19 +149,32 @@
             accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar"
           />
 
+          <!-- MESSAGE -->
           <input
             id="messageInput"
             type="text"
             placeholder="Type a message"
+            autocomplete="off"
           />
 
-          <button id="sendBtn" class="send-btn" type="button">➤</button>
+          <!-- SEND -->
+          <button
+            id="sendBtn"
+            class="send-btn"
+            type="button"
+          >
+            ➤
+          </button>
         </footer>
       </section>
     </main>
 
     <!-- CREATE GROUP MODAL -->
-    <div id="groupModal" class="group-modal" style="display: none">
+    <div
+      id="groupModal"
+      class="group-modal"
+      style="display: none"
+    >
       <div class="group-modal-content">
         <h2>Create Group</h2>
 
@@ -123,14 +186,34 @@
 
         <h4>Select Members</h4>
 
-        <div id="groupUsers" class="group-users"></div>
+        <div
+          id="groupUsers"
+          class="group-users"
+        ></div>
 
         <div class="group-modal-actions">
-          <button id="cancelGroupBtn">Cancel</button>
-          <button id="createGroupConfirmBtn">Create Group</button>
+          <button
+            id="cancelGroupBtn"
+            type="button"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="createGroupConfirmBtn"
+            type="button"
+          >
+            Create Group
+          </button>
         </div>
       </div>
     </div>
+
+    <!-- EMOJI PICKER -->
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"
+    ></script>
 
     <!-- SOCKET.IO -->
     <script src="/socket.io/socket.io.js"></script>

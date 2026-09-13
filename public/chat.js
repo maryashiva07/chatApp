@@ -19,20 +19,57 @@ const groupUsers = document.getElementById("groupUsers");
 const cancelGroupBtn = document.getElementById("cancelGroupBtn");
 const createGroupConfirmBtn = document.getElementById("createGroupConfirmBtn");
 
-// Create media file input
-let mediaInput = document.getElementById("mediaInput");
+const typingSuggestions = document.getElementById("typingSuggestions");
+const smartReplies = document.getElementById("smartReplies");
+
+// Media input
+let mediaInput =
+  document.getElementById("fileInput") || document.getElementById("mediaInput");
 
 if (!mediaInput) {
   mediaInput = document.createElement("input");
-
   mediaInput.type = "file";
   mediaInput.id = "mediaInput";
-
   mediaInput.accept = "image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar";
-
   mediaInput.style.display = "none";
-
   document.body.appendChild(mediaInput);
+}
+
+// Emoji functionality
+const emojiBtn = document.getElementById("emojiBtn");
+const emojiPicker = document.getElementById("emojiPicker");
+
+if (emojiBtn && emojiPicker) {
+  emojiBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    emojiPicker.classList.toggle("show");
+  });
+
+  emojiPicker.addEventListener("emoji-click", (event) => {
+    const emoji = event.detail.unicode;
+
+    const start = messageInput.selectionStart;
+    const end = messageInput.selectionEnd;
+
+    messageInput.value =
+      messageInput.value.substring(0, start) +
+      emoji +
+      messageInput.value.substring(end);
+
+    messageInput.focus();
+
+    const newPosition = start + emoji.length;
+
+    messageInput.setSelectionRange(newPosition, newPosition);
+
+    handleTypingSuggestions();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+      emojiPicker.classList.remove("show");
+    }
+  });
 }
 
 // Current user
@@ -80,6 +117,10 @@ let recentUserOrder = JSON.parse(
   localStorage.getItem("recentUserOrder") || "[]",
 );
 
+// AI state
+let suggestionTimer = null;
+let suggestionRequestId = 0;
+
 // Socket
 const token = localStorage.getItem("token");
 
@@ -99,6 +140,9 @@ if (backBtn) {
     selectedChatType = null;
 
     chatIsOpen = false;
+
+    clearSmartReplies();
+    clearTypingSuggestions();
   });
 }
 
@@ -155,7 +199,6 @@ socket.on("new_message", (data) => {
     }
   }
 
-  // Move sender to top
   moveUserToTop(senderId);
 
   if (
@@ -168,6 +211,8 @@ socket.on("new_message", (data) => {
     markMessagesAsSeen(senderId);
 
     removeUnreadCount(senderId);
+
+    generateSmartReplies(messageText);
 
     return;
   }
@@ -202,6 +247,8 @@ socket.on("group_message", (data) => {
     addGroupMessage(data);
 
     removeGroupUnreadCount(groupId);
+
+    generateSmartReplies(data.message);
 
     return;
   }
@@ -259,6 +306,210 @@ function moveUserToTop(userId) {
   localStorage.setItem("recentUserOrder", JSON.stringify(recentUserOrder));
 
   renderUsers();
+}
+
+// AI clear typing suggestions
+function clearTypingSuggestions() {
+  if (typingSuggestions) {
+    typingSuggestions.innerHTML = "";
+  }
+}
+
+// AI clear smart replies
+function clearSmartReplies() {
+  if (smartReplies) {
+    smartReplies.innerHTML = "";
+  }
+}
+
+// AI render typing suggestions
+function renderTypingSuggestions(suggestions) {
+  if (!typingSuggestions) {
+    return;
+  }
+
+  typingSuggestions.innerHTML = "";
+
+  suggestions.forEach((suggestion) => {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "ai-suggestion";
+    button.textContent = suggestion;
+
+    button.addEventListener("click", () => {
+      insertSuggestion(suggestion);
+    });
+
+    typingSuggestions.appendChild(button);
+  });
+}
+
+// AI insert suggestion
+function insertSuggestion(suggestion) {
+  if (!messageInput) {
+    return;
+  }
+
+  const currentText = messageInput.value.trim();
+
+  if (!currentText) {
+    messageInput.value = suggestion;
+  } else {
+    messageInput.value = `${currentText} ${suggestion}`;
+  }
+
+  messageInput.focus();
+
+  clearTypingSuggestions();
+}
+
+// AI typing suggestion request
+async function getTypingSuggestions(text) {
+  const authToken = localStorage.getItem("token");
+
+  if (!authToken || !text.trim()) {
+    clearTypingSuggestions();
+    return;
+  }
+
+  const requestId = ++suggestionRequestId;
+
+  try {
+    if (typingSuggestions) {
+      typingSuggestions.innerHTML =
+        '<span class="ai-loading">AI thinking...</span>';
+    }
+
+    const response = await fetch(`${API_URL}/ai/suggestions`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+
+      body: JSON.stringify({
+        text: text,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (requestId !== suggestionRequestId) {
+      return;
+    }
+
+    if (!response.ok) {
+      console.log("AI Suggestion Error:", data.message);
+
+      clearTypingSuggestions();
+
+      return;
+    }
+
+    renderTypingSuggestions(data.suggestions || []);
+  } catch (error) {
+    console.log("AI Suggestion Error:", error);
+
+    clearTypingSuggestions();
+  }
+}
+
+// AI typing handler
+function handleTypingSuggestions() {
+  if (!messageInput) {
+    return;
+  }
+
+  const text = messageInput.value.trim();
+
+  clearTimeout(suggestionTimer);
+
+  if (text.length < 3) {
+    clearTypingSuggestions();
+    return;
+  }
+
+  suggestionTimer = setTimeout(() => {
+    getTypingSuggestions(text);
+  }, 500);
+}
+
+// AI smart replies request
+async function generateSmartReplies(message) {
+  const authToken = localStorage.getItem("token");
+
+  if (!authToken || !message || !message.trim()) {
+    return;
+  }
+
+  try {
+    if (smartReplies) {
+      smartReplies.innerHTML = '<span class="ai-loading">AI replies...</span>';
+    }
+
+    const response = await fetch(`${API_URL}/ai/smart-replies`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+
+      body: JSON.stringify({
+        message: message,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.log("Smart Reply Error:", data.message);
+
+      clearSmartReplies();
+
+      return;
+    }
+
+    renderSmartReplies(data.replies || []);
+  } catch (error) {
+    console.log("Smart Reply Error:", error);
+
+    clearSmartReplies();
+  }
+}
+
+// AI render smart replies
+function renderSmartReplies(replies) {
+  if (!smartReplies) {
+    return;
+  }
+
+  smartReplies.innerHTML = "";
+
+  replies.forEach((reply) => {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "smart-reply";
+    button.textContent = reply;
+
+    button.addEventListener("click", () => {
+      messageInput.value = reply;
+      messageInput.focus();
+
+      clearSmartReplies();
+      clearTypingSuggestions();
+    });
+
+    smartReplies.appendChild(button);
+  });
+}
+
+// AI typing event
+if (messageInput) {
+  messageInput.addEventListener("input", handleTypingSuggestions);
 }
 
 // Send message
@@ -321,7 +572,6 @@ async function sendMessage() {
 
     addMessage(data.chat);
 
-    // Move current chat to top
     moveUserToTop(selectedUserId);
 
     const roomId = getRoomId(currentUser.id, selectedUserId);
@@ -336,6 +586,10 @@ async function sendMessage() {
     }
 
     messageInput.value = "";
+
+    clearTypingSuggestions();
+    clearSmartReplies();
+
     messageInput.focus();
   } catch (error) {
     console.log("Send Message Error:", error);
@@ -370,6 +624,10 @@ async function sendGroupMessage(message) {
   });
 
   messageInput.value = "";
+
+  clearTypingSuggestions();
+  clearSmartReplies();
+
   messageInput.focus();
 }
 
@@ -512,7 +770,6 @@ async function sendMediaMessage(file, optionalText = "") {
     message: optionalText || chat.message || `[${fileName}]`,
   };
 
-  // Group media
   if (selectedChatType === "group") {
     const groupId = String(selectedGroupId);
 
@@ -548,12 +805,14 @@ async function sendMediaMessage(file, optionalText = "") {
 
     messageInput.value = "";
 
+    clearTypingSuggestions();
+    clearSmartReplies();
+
     messageInput.focus();
 
     return;
   }
 
-  // Personal media
   if (!selectedUserId) {
     alert("Please select a user");
     return;
@@ -561,7 +820,6 @@ async function sendMediaMessage(file, optionalText = "") {
 
   addMessage(mediaMessage);
 
-  // Move current chat to top
   moveUserToTop(selectedUserId);
 
   const roomId = getRoomId(currentUser.id, selectedUserId);
@@ -589,6 +847,9 @@ async function sendMediaMessage(file, optionalText = "") {
   clearMediaInput();
 
   messageInput.value = "";
+
+  clearTypingSuggestions();
+  clearSmartReplies();
 
   messageInput.focus();
 }
@@ -861,7 +1122,6 @@ function openPersonalChat(user, chatItem) {
 
   chatIsOpen = true;
 
-  // Keep selected chat at top
   moveUserToTop(selectedUserId);
 
   const roomId = getRoomId(currentUser.id, selectedUserId);
@@ -896,6 +1156,9 @@ function openPersonalChat(user, chatItem) {
   document.getElementById("selectedUserStatus").textContent = "online";
 
   removeUnreadCount(user.id);
+
+  clearSmartReplies();
+  clearTypingSuggestions();
 
   messages.innerHTML = "";
 
@@ -957,8 +1220,8 @@ function addMessage(chat) {
     ${
       mediaHtml && text && !text.startsWith("[")
         ? `<p class="media-caption">
-             ${escapeHtml(text)}
-           </p>`
+            ${escapeHtml(text)}
+          </p>`
         : ""
     }
 
@@ -1024,8 +1287,8 @@ function addGroupMessage(data) {
     ${
       mediaHtml && text && !text.startsWith("[")
         ? `<p class="media-caption">
-             ${escapeHtml(text)}
-           </p>`
+            ${escapeHtml(text)}
+          </p>`
         : ""
     }
 
@@ -1315,6 +1578,9 @@ async function openGroup(group, groupItem = null) {
   document.getElementById("selectedUserStatus").textContent =
     `${group.members?.length || 0} members`;
 
+  clearSmartReplies();
+  clearTypingSuggestions();
+
   messages.innerHTML = "";
 
   removeGroupUnreadCount(selectedGroupId);
@@ -1443,7 +1709,6 @@ async function createGroup() {
 
   if (!groupName) {
     alert("Please enter group name");
-
     return;
   }
 
@@ -1526,9 +1791,9 @@ if (createGroupConfirmBtn) {
 }
 
 // Attach button
-const attachButton = document.querySelector(
-  ".message-input-area .input-icon:nth-child(2)",
-);
+const attachButton =
+  document.getElementById("fileBtn") ||
+  document.querySelector(".message-input-area .input-icon:nth-child(2)");
 
 if (attachButton) {
   attachButton.addEventListener("click", () => {
@@ -1543,17 +1808,19 @@ if (attachButton) {
 }
 
 // File selected
-mediaInput.addEventListener("change", () => {
-  const file = mediaInput.files?.[0];
+if (mediaInput) {
+  mediaInput.addEventListener("change", () => {
+    const file = mediaInput.files?.[0];
 
-  if (!file) {
-    return;
-  }
+    if (!file) {
+      return;
+    }
 
-  console.log("Selected media:", file.name, file.type, file.size);
+    console.log("Selected media:", file.name, file.type, file.size);
 
-  sendMediaMessage(file, messageInput.value.trim());
-});
+    sendMediaMessage(file, messageInput.value.trim());
+  });
+}
 
 // Send button
 if (sendBtn) {

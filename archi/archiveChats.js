@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 
-const ChatMessage = require("../modules/chatMessage");
+const {ChatMessage} = require("../modules/chatMessage");
 const ArchivedChat = require("../modules/ArchivedChat");
 const { redisClient } = require("../config/redis");
 

@@ -12,6 +12,7 @@ const sequelize = require("./config/database");
 const chatRoute = require("./routes/chatRoutes");
 const groupRoute = require("./routes/groupRoutes");
 const mediaRoute = require("./routes/mediaRoutes");
+const aiRoute = require("./routes/aiRoutes");
 
 const initializeSocket = require("./socket-io/index");
 
@@ -33,6 +34,7 @@ app.use("/api", userRoute);
 app.use("/api", chatRoute);
 app.use("/api", groupRoute);
 app.use("/api", mediaRoute);
+app.use("/api", aiRoute);
 
 const PORT = process.env.PORT || 7000;
 
