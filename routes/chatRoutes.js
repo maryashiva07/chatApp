@@ -3,7 +3,7 @@ const router = express.Router();
 
 
 const {authMiddleware} = require("../middleware/authMiddleware");
-const {sendMessage, getMessages, markMessagesAsSeen} = require("../controllers/chatController");
+const {sendMessage, getMessages, markMessagesAsSeen, getUnreadCounts} = require("../controllers/chatController");
 
 
 router.post("/messages", authMiddleware, sendMessage);
@@ -11,6 +11,8 @@ router.post("/messages", authMiddleware, sendMessage);
 router.get("/messages", authMiddleware, getMessages);
 
 router.put("/messages/seen", authMiddleware, markMessagesAsSeen);
+
+router.get("/messages/unread", authMiddleware, getUnreadCounts);
 
 
 module.exports = router;

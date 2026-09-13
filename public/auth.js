@@ -33,9 +33,6 @@ if (signupForm) {
 
     const email = document.getElementById("email").value.trim();
 
-    // const phone =
-    //     document.getElementById("phone").value.trim();
-
     const password = document.getElementById("signupPassword").value;
 
     let isValid = true;
@@ -52,16 +49,7 @@ if (signupForm) {
       isValid = false;
     }
 
-    // const phonePattern =
-    //     /^[6-9]\d{9}$/;
-
-    // if (!phonePattern.test(phone)) {
-    //     showError(
-    //         "phoneError",
-    //         "Enter a valid 10-digit phone number."
-    //     );
-    //     isValid = false;
-    // }
+    
 
     if (password.length < 8) {
       showError(

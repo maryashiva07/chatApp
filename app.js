@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -7,18 +9,27 @@ const { connectRedis } = require("./config/redis");
 const userRoute = require("./routes/userRoutes");
 const sequelize = require("./config/database");
 const chatRoute = require("./routes/chatRoutes");
+const groupRoute = require("./routes/groupRoutes");
+const mediaRoute = require("./routes/mediaRoutes");
 
-const initializeSocket = require("./socket-io");
+const initializeSocket = require("./socket-io/index");
+
+//association file
+require("./association/index");
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", userRoute);
 app.use("/api", chatRoute);
+app.use("/api", groupRoute);
+app.use("/api", mediaRoute);
 
 const PORT = process.env.PORT || 7000;
 

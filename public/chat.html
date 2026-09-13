@@ -2,63 +2,55 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Chat Window</title>
-
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
     <main class="chat-app">
       <!-- SIDEBAR -->
-
       <aside class="sidebar">
-    
         <div class="sidebar-header">
           <div class="profile">
             <div class="avatar" id="myAvatar">S</div>
 
             <div>
               <h3 id="myName">Chats</h3>
-
-              <span> Online </span>
+              <span>Online</span>
             </div>
           </div>
 
           <button class="icon-btn">⋮</button>
         </div>
 
-        <!-- Search -->
+        <!-- SEARCH -->
         <div class="search-box">
-          <span> ⌕ </span>
-
-          <input type="text" id="searchInput" placeholder="Search by email" />
+          <span>⌕</span>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by email"
+          />
         </div>
 
-        <!-- Create Group -->
+        <!-- CREATE GROUP -->
         <button id="createGroupBtn" class="create-group-btn">
           + Create Group
         </button>
 
-        <!-- Groups heading -->
-        <div class="section-title">Groups</div>
-
-        <!-- Groups -->
-        <div class="chat-list" id="groupList"></div>
-
-        <!-- Users heading -->
+        <!-- USERS -->
         <div class="section-title">Users</div>
-
-        <!-- Users -->
         <div class="chat-list" id="chatList"></div>
+
+        <!-- GROUPS -->
+        <div class="section-title">Groups</div>
+        <div class="chat-list" id="groupList"></div>
       </aside>
 
-      <!--CHAT WINDOW -->
-
+      <!-- CHAT WINDOW -->
       <section class="chat-window">
-        <!-- Header -->
+        <!-- HEADER -->
         <header class="chat-header">
           <button class="mobile-back" id="backBtn">←</button>
 
@@ -67,41 +59,67 @@
 
             <div>
               <h3 id="selectedUserName">Select a chat</h3>
-
-              <span id="selectedUserStatus"> offline </span>
+              <span id="selectedUserStatus">offline</span>
             </div>
           </div>
 
           <div class="header-actions">
             <button class="icon-btn">⌕</button>
-
             <button class="icon-btn">⋮</button>
           </div>
         </header>
 
-        <!-- Messages -->
+        <!-- MESSAGES -->
         <div class="messages" id="messages"></div>
 
-        <!-- Message input -->
+        <!-- MESSAGE INPUT -->
         <footer class="message-input-area">
-          <button class="input-icon">😊</button>
+          <button
+            class="input-icon emoji-btn"
+            id="emojiBtn"
+            type="button"
+            title="Emoji"
+          >
+            😊
+          </button>
 
-          <button class="input-icon">📎</button>
+          <button
+            class="input-icon file-btn"
+            id="fileBtn"
+            type="button"
+            title="Attach file"
+          >
+            📎
+          </button>
 
-          <input id="messageInput" type="text" placeholder="Type a message" />
+          <input
+            type="file"
+            id="fileInput"
+            hidden
+            accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar"
+          />
 
-          <button id="sendBtn" class="send-btn">➤</button>
+          <input
+            id="messageInput"
+            type="text"
+            placeholder="Type a message"
+          />
+
+          <button id="sendBtn" class="send-btn" type="button">➤</button>
         </footer>
       </section>
     </main>
 
-    <!--CREATE GROUP MODAL -->
-
+    <!-- CREATE GROUP MODAL -->
     <div id="groupModal" class="group-modal" style="display: none">
       <div class="group-modal-content">
         <h2>Create Group</h2>
 
-        <input type="text" id="groupNameInput" placeholder="Enter group name" />
+        <input
+          type="text"
+          id="groupNameInput"
+          placeholder="Enter group name"
+        />
 
         <h4>Select Members</h4>
 
@@ -109,16 +127,15 @@
 
         <div class="group-modal-actions">
           <button id="cancelGroupBtn">Cancel</button>
-
           <button id="createGroupConfirmBtn">Create Group</button>
         </div>
       </div>
     </div>
 
-    <!-- Socket.IO -->
+    <!-- SOCKET.IO -->
     <script src="/socket.io/socket.io.js"></script>
 
-    <!-- Chat JS -->
+    <!-- CHAT JS -->
     <script src="chat.js"></script>
   </body>
 </html>
