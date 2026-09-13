@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const http = require("http");
+const { CronJob } = require("cron");
 
 const { connectRedis } = require("./config/redis");
 const userRoute = require("./routes/userRoutes");
@@ -14,7 +15,9 @@ const mediaRoute = require("./routes/mediaRoutes");
 
 const initializeSocket = require("./socket-io/index");
 
-//association file
+const archiveOldChats = require("./archi/archiveChats");
+
+// association file
 require("./association/index");
 
 const app = express();
@@ -37,13 +40,21 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// Create HTTP Server
 const server = http.createServer(app);
 
-// Initialize Socket.IO
 initializeSocket(server);
 
-// Start Server
+// Archive old chats every night at 12:00 AM IST
+const archiveJob = new CronJob(
+  "0 0 * * *",
+  archiveOldChats,
+  null,
+  true,
+  "Asia/Kolkata",
+);
+
+console.log("Chat archive cron job started.");
+
 async function startServer() {
   try {
     await sequelize.authenticate();
